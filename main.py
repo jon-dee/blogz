@@ -1,6 +1,6 @@
 from flask import Flask, request, redirect, render_template, session
 from flask_sqlalchemy import SQLAlchemy
-import cgi
+
 
 app = Flask(__name__)
 app.config['DEBUG'] = True
@@ -36,7 +36,7 @@ class User(db.Model):
 
 @app.before_request
 def require_login():
-    only_pages = ['login', 'blog', 'index', 'signup']
+    only_pages = ['blog', 'index', 'signup', 'login']
     if request.endpoint not in only_pages and 'username' not in session:
         return redirect('/login')
 
@@ -51,7 +51,7 @@ def index():
 @app.route('/blog', methods=['POST', 'GET'])
 def blog_display():
 
-    if 'user' in request.args:
+    if "user" in request.args:
         blog_id = request.args.get("user")
         blog_post = Blogs.query.get(blog_id)
         persons_blog = Blogs.query.filter_by(owner=user).all()
@@ -101,7 +101,7 @@ def new_post():
 @app.route("/login", methods=['GET', 'POST'])
 def login():
     name_error = ''
-    pass_error = '' 
+    pass_error = ''
     username = ''
 
     if request.method == 'GET':
@@ -119,18 +119,18 @@ def login():
             session['username'] = user_login
             return redirect('/newpost')
 
-        if username and user.password != user_pass:
+        if user and user.password != user_pass:
             pass_error = "Wrong password, please try again."
             return render_template('login.html', pass_error=pass_error)
 
         if not user:
             name_error = "This username does not exist. Create an account!"
-            return render_template('login.html', name_error=name_error)
+            return render_template('login.html', name_error=name_error, user_login = user_login)
     
     else:
         return render_template('login.html')
 
-@app.route("/signup", methods=['POST'])
+@app.route("/signup", methods=['GET', 'POST'])
 def signup_complete_form():
 
     user_errors = ''

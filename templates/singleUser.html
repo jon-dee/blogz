@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+    {% if persons_blog|length == 0 %}
+        <p>No blog posts to show!</p>
+
+    {% else %}
+        {% for blog in persons_blog|sort(attribue='id', reverse = True) %}
+
+        <h2><a href="/blog?id={{blog.id}}">{{blogs.title}}</a></h2>
+        <p>{{blogs.body}}</p>
+        <hr style="border: 1px solid #000000;" />
+        <p><strong>Written By:</strong><a href="/blog?user={{blogs.owner_id}}">{{blogs.owner.username}}</a></p>
+
+        {% endfor %}
+    {% endif %}
+
+{% endblock %}

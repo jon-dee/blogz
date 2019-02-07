@@ -6,12 +6,20 @@
             h1{
                 text-align: center;
             }
+
+            .error{
+                color: red;
+            }
+            
         </style>
     </head>
 <body>
     <div>
-        <a href="/blog">Main Blog Page</a>
+        <a href='/''>Home</a>
+        <a href='/blog'>Main Blog Page</a>
         <a href='/newpost'>Add a Blog Entry</a>
+        <a href='/login'>Login</a>
+        <a href='/logout'>Logout</a>
     </div>
 
     {% block content %}

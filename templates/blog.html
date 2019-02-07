@@ -3,12 +3,12 @@
 {% block content %}
     <h1>Build a Blog</h1>
 
-        <ul>
+        
             {% for blogs in blog %}
-            <li><h2>><a href="/blog?id={{blogs.id}}">{{blogs.title}}</a></h2>
+            <h2>><a href="/blog?id={{blogs.id}}">{{blogs.title}}</a></h2>
             <p>{{blogs.body}}</p>
             <hr style="border: 1px solid#000000;" />
-            </li>
+        
             {% endfor %}
-        </ul>
+        
 {% endblock %}

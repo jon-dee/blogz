@@ -40,6 +40,8 @@ class User(db.Model):
 #    if request.endpoint not in only_pages and 'username' not in session:
 #        return redirect('/login')
 
+
+
 @app.route('/', methods=['POST', 'GET'])
 def index():
 
@@ -50,8 +52,8 @@ def index():
 @app.route('/blog', methods=['POST', 'GET'])
 def blog_display():
 
-    if "user" in request.args:
-        blog_id = request.args.get("user")
+    if "username" in request.args:
+        blog_id = request.args.get("username")
         blog_post = Blogs.query.get(blog_id)
         persons_blog = Blogs.query.filter_by(owner=user).all()
         return render_template('singleUser.html', page_title="user.username" + "'s Posts", persons_blog=persons_blog)
@@ -114,11 +116,11 @@ def login():
         user_pass  = request.form['user_pass']
         user = User.query.filter_by(username=username).first()
 
-        if user and user.password == user_pass:
-            session['username'] = user_login
+        if user_login and user_pass == user:
+            session['username'] = user.username
             return redirect('/newpost')
 
-        if user and user.password != user_pass:
+        if user_login and user_pass != user:
             pass_error = "Wrong password, please try again."
             return render_template('login.html', pass_error=pass_error)
 
@@ -135,6 +137,7 @@ def signup_complete_form():
     user_errors = ''
     pass_error = ''
     verpass_error = ''
+    username_errors = ''
 
     if request.method == 'GET':
         return render_template('signup.html')

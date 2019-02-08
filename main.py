@@ -34,18 +34,17 @@ class User(db.Model):
         self.password = password
 
 
-@app.before_request
-def require_login():
-    only_pages = ['blog', 'index', 'signup', 'login']
-    if request.endpoint not in only_pages and 'username' not in session:
-        return redirect('/login')
+#@app.before_request
+#def require_login():
+#    only_pages = ['blog', 'index', 'signup', 'login']
+#    if request.endpoint not in only_pages and 'username' not in session:
+#        return redirect('/login')
 
 @app.route('/', methods=['POST', 'GET'])
 def index():
 
 
-    all_users = ''
-    all_users: User.query.all()
+    all_users = User.query.all()
     return render_template('index.html', all_users=all_users)
 
 @app.route('/blog', methods=['POST', 'GET'])
@@ -154,7 +153,7 @@ def signup_complete_form():
         if password != verpass:
             verpass_error = "Passwords do not match! Try Again."
 
-        if user_error != '' or pass_error != '' or verpass_error != '':
+        if user_errors != '' or pass_error != '' or verpass_error != '':
             return render_template('signup.html', user_errors=user_errors, pass_error=pass_error, verpass_error=verpass_error, username=username)
         
         user_exists = User.query.filter_by(username=username).first()
@@ -164,7 +163,7 @@ def signup_complete_form():
         
         if not user_exists:
             user_create = User(username, password)
-            db.session.add(new_user)
+            db.session.add(user_create)
             db.session.commit()
             session['username'] = username
             return redirect('/newpost')

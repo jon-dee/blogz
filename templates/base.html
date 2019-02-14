@@ -10,17 +10,31 @@
             .error{
                 color: red;
             }
+
+            .bar{
+                text-align: right
+            }
             
         </style>
     </head>
 <body>
     <div>
-        <a href='/'>Home</a>
-        <a href='/blog'>Main Blog Page</a>
+        <a href='/'>Home</a>  |  
+        <a href='/blog'>Main Blog Page</a>  |  
         <a href='/newpost'>Add a Blog Entry</a>
-        <a href='/login'>Login</a>
+    </div>
+    <div class="bar">
+        <a href='/login'>Login</a>  |  
         <a href='/logout'>Logout</a>
     </div>
+
+    {% with messages = get_flashed_messages(with_categories=True) %}
+    <ul>
+    {% for category,message in messages %}
+        <li class="{{category}}">{{message}}</li>
+    {% endfor %}
+    </ul>
+    {% endwith %}
 
     {% block content %}
     {% endblock %}

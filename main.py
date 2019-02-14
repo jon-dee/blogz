@@ -1,6 +1,6 @@
-from flask import Flask, request, redirect, render_template, session
+from flask import Flask, flash, request, redirect, render_template, session
 from flask_sqlalchemy import SQLAlchemy
-
+#check studio 7 or 8 for login
 
 app = Flask(__name__)
 app.config['DEBUG'] = True
@@ -34,11 +34,11 @@ class User(db.Model):
         self.password = password
 
 
-#@app.before_request
-#def require_login():
-#    only_pages = ['blog', 'index', 'signup', 'login']
-#    if request.endpoint not in only_pages and 'username' not in session:
-#        return redirect('/login')
+@app.before_request
+def require_login():
+    only_pages = ['blog', 'index', 'signup_here', 'login']
+    if request.endpoint not in only_pages and 'username' not in session:
+        return redirect('/login')
 
 
 
@@ -50,22 +50,23 @@ def index():
     return render_template('index.html', all_users=all_users)
 
 @app.route('/blog', methods=['POST', 'GET'])
-def blog_display():
+def blog():
 
-    if "username" in request.args:
-        blog_id = request.args.get("username")
-        blog_post = Blogs.query.get(blog_id)
-        persons_blog = Blogs.query.filter_by(owner=user).all()
-        return render_template('singleUser.html', page_title="user.username" + "'s Posts", persons_blog=persons_blog)
+    if "user" in request.args:
+            user_id = request.args.get("user")
+            user = User.query.get(user_id)
+            user_blogs = Blogs.query.filter_by(owner=user).all()
+            return render_template("singleUser.html", page_title = user.username + "'s Posts!", 
+                                                        user_blogs=user_blogs, user=user, user_id=user_id)
+        
+    single_post = request.args.get("id")
+    if single_post:
+        blog = Blogs.query.get(single_post)
+        return render_template("blogentry.html", blog=blog)
 
-    one_post = request.args.get("id")
-    if one_post:
-        blog = Blogs.query.get(one_post)
-        return render_template('blogentry.html', blog=blog)
-
-    else:  
-        blog = Blogs.query.all()
-        return render_template('blog.html', page_title= 'All Posts', blog=blog)
+    else:
+        blogs = Blogs.query.all()
+        return render_template('blog.html', page_title="All Blog Posts!", blogs=blogs)
 
 
 @app.route('/newpost', methods=['POST', 'GET'])
@@ -89,7 +90,7 @@ def new_post():
             body_error == "Enter text for your post!"
 
         if title_error or body_error:
-            return render_template('newpost.html', titlebase="New Entry", title_error= title_error, body_error=body_error, title=title, body=body)
+            return render_template('newpost.html', page_title="New Entry", title_error= title_error, body_error=body_error, title=title, body=body)
 
         else:
             if len(title) and len(body) > 0:
@@ -101,38 +102,35 @@ def new_post():
 
 @app.route("/login", methods=['GET', 'POST'])
 def login():
-    name_error = ''
-    pass_error = ''
-    username = ''
 
     if request.method == 'GET':
         if 'username' not in session:
-            return render_template('login.html', page_title='Login')
+            return render_template("login.html", page_title='Login')
         else:
             return redirect('/newpost')
-    
-    if request.method == 'POST':
-        user_login = request.form['user_login']
-        user_pass  = request.form['user_pass']
-        user = User.query.filter_by(username=username).first()
 
-        if user_login and user_pass == user:
-            session['username'] = user.username
+    if request.method == 'POST':
+        username = request.form['user_login']
+        password = request.form['user_pass']
+        user = User.query.filter_by(username=username).first()
+        if user and user.password == password:
+            session['username'] = username
+            flash('Logged in')
             return redirect('/newpost')
 
-        if user_login and user_pass != user:
-            pass_error = "Wrong password, please try again."
-            return render_template('login.html', pass_error=pass_error)
+
+        if user and user.password != password:
+            flash('Password incorrect, please try again!', 'error')
+            return render_template('login.html')
 
         if not user:
-            name_error = "This username does not exist. Create an account!"
-            return render_template('login.html', name_error=name_error, user_login = user_login)
-    
+            flash('Username not found, please sign up!', 'error')
+            return render_template('login.html')
+
     else:
         return render_template('login.html')
-
 @app.route("/signup", methods=['GET', 'POST'])
-def signup_complete_form():
+def signup_here():
 
     user_errors = ''
     pass_error = ''
@@ -157,12 +155,12 @@ def signup_complete_form():
             verpass_error = "Passwords do not match! Try Again."
 
         if user_errors != '' or pass_error != '' or verpass_error != '':
-            return render_template('signup.html', user_errors=user_errors, pass_error=pass_error, verpass_error=verpass_error, username=username)
+            return render_template('signup.html', page_title = "Sign Up", user_errors=user_errors, pass_error=pass_error, verpass_error=verpass_error, username=username)
         
         user_exists = User.query.filter_by(username=username).first()
         if user_exists:
             username_errors = "This username already exists! Choose a different username!"
-            return render_template('signup.html', username_errors = username_errors)
+            return render_template('signup.html',page_title="Sign Up", username_errors = username_errors)
         
         if not user_exists:
             user_create = User(username, password)
